@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<button onclick="window.location.href = '/';">Home</button>
+
+{{ prediction}}
+{% for table in tables %}
+            {{ table|safe }}
+{% endfor %}
+
+{%if showButton %}
+<form method="post" action="/predict">
+    <input type="submit" value="Predict" name="predict"/>
+    <input type="hidden" id="filename" name="fId" value="{{filename}}">
+
+{% endif %}
+
+</form>
+
+</body>
+</html>

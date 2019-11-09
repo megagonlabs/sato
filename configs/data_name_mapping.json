@@ -1,0 +1,5 @@
+{
+"MPO_type78": ["plotly_sherlock_features.csv", "opendata_sherlock_features.csv", "manyeyes_sherlock_features.csv"],
+"M_type78": ["manyeyes_sherlock_features.csv"],
+"W_type78":["webtables0_sherlock_features.csv"]
+}

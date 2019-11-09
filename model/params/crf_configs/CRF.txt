@@ -1,0 +1,8 @@
+MAX_COL_COUNT = 6
+table_batch_size = 10
+corpus_list = [webtables1-p1, webtables2-p1]
+init_matrix_path = matrix_co_W0_type78.npy
+epochs = 15
+topic = None
+pre_trained_sherlock_path = sherlock_None.pt
+training_acc = False

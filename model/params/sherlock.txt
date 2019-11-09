@@ -1,0 +1,5 @@
+corpus_list = [webtables1-p1, webtables2-p1]
+epochs = 50
+batch_size = 256
+sherlock_feature_groups = [char, word, par, rest]
+topic = None
