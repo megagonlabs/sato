@@ -46,39 +46,14 @@
 
     <!-- Jumbotron Header -->
     <header class="jumbotron my-4">
-      <div class = 'row'>
-        <div class = 'col-md-9'>
-        <h4>Use example tables </h4>
-
-         <div class="list-group">
-          <a href="/uploads/theaters.csv" class="list-group-item list-group-item-action">Theaters</a>
-          <a href="/uploads/University_employees.csv" class="list-group-item list-group-item-action">University Employees</a>
-        </div>
-
-        </div>
-
-      </div>
-
-    <div class='row'>
-        <div class='col-md-9'>
-        <hr>
-       </div>
-       </div>
-
+      
     <div class = 'row'>
          <div class = 'col-md-9'>
-         <h4> Upload your own table </h4>
-
+         <h4> Table too large </h4>
          Note: Although Sato could support much large tables, we restrict table size for this web demo. <br />
          Tables size need to be < 5MB, columns<=6 cols and rows<=200.
          <br />
-         Don't upload any sensitive data.
-
-         <form action = "/uploader" method = "POST" 
-         enctype = "multipart/form-data">
-         <input type = "file" name = "file" />
-         <input type = "submit"/>
-         </form>
+         Uploaded table has {{cols}} columns and {{rows}} rows.  
 
         </div>
 
