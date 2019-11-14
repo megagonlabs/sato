@@ -155,7 +155,8 @@ if shuffle_col:
 currentDT = datetime.datetime.now()
 DTString = '-'.join([str(x) for x in currentDT.timetuple()[:5]])
 logging_base = 'CRF_log' if device == torch.device('cpu') else 'CRF_cuda_log'
-logging_path = join(os.environ['BASEPATH'],'results', logging_base, TYPENAME, '{}_{}_{}'.format(config_name, args.comment, DTString))
+#logging_path = join(os.environ['BASEPATH'],'results', logging_base, TYPENAME, '{}_{}_{}'.format(config_name, args.comment, DTString))
+logging_path = join(os.environ['BASEPATH'],'results', logging_base, TYPENAME, '{}_{}'.format(config_name, args.comment))
 writer = SummaryWriter(logging_path)
 writer.add_text("configs", str(p.format_values()))
 
