@@ -1,10 +1,14 @@
 # Sato: Contextual Semantic Type Detection in Tables 
 This repository includes source code, scripts, and data for training the Sato model.  The repo also includes a pretrained  model to help replicate the results in [our preprint](https://arxiv.org/abs/1911.06311).  Sato is a hybrid machine learning model to automatically detect the semantic types of columns in tables, exploiting the signals from the context as well as the column values. Sato combines a deep learning model trained on a large-scale table corpus with topic modeling and structured prediction. 
 
+<img src="diagram-overview.svg" width="700"/>
+Above: Sato architecture. Sato's hyrid architecture consists of two basic modules; a topic-aware single-column prediction module and a structured output prediction module. The topic-aware module extends single-column prediction models with additional topic subnetworks, incorporating a context modeling table intent into the model. The structure prediction module then combines the topic-aware results for all m columns, providing the final semantic type prediction for the columns in the table.
+
 ## What is Sato useful for?
 Myriad data preparation and information retrieval tasks including data cleaning, integration, discovery and search rely
 on the ability to accurately detect data column types. Schema matching for data integration leverages data types to find correspondences between data columns across tables. Similarly, data discovery benefits from detecting types of data
 columns in order to return semantically relevant results foruser queries. Recognizing the semantics of table values helps aggregate information from multiple tabular data sources. Search engines also rely on the detection of semantically relevant column names to extend support to tables. Natural language based query interfaces for structured data can also benefit from semantic type detection. 
+
 
 ### Demo
 We set up a simple online [demo](http://18.191.96.23:5000/) where users can upload small tables and get semantic predictions for column types.
