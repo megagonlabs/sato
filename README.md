@@ -1,7 +1,7 @@
 # Sato: Contextual Semantic Type Detection in Tables 
 This repository includes source code, scripts, and data for training the Sato model.  The repo also includes a pretrained  model to help replicate the results in [our preprint](https://arxiv.org/abs/1911.06311).  Sato is a hybrid machine learning model to automatically detect the semantic types of columns in tables, exploiting the signals from the context as well as the column values. Sato combines a deep learning model trained on a large-scale table corpus with topic modeling and structured prediction. 
 
-<img src="diagram-overview.svg" width="700"/>
+<img src="diagram-overview.svg" width="800"/>
 Above: Sato architecture. Sato's hyrid architecture consists of two basic modules; a topic-aware single-column prediction module and a structured output prediction module. The topic-aware module extends single-column prediction models with additional topic subnetworks, incorporating a context modeling table intent into the model. The structure prediction module then combines the topic-aware results for all m columns, providing the final semantic type prediction for the columns in the table.
 
 ## What is Sato useful for?
