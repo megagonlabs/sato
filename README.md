@@ -118,7 +118,12 @@ Please cite [the arXiv preprint](https://arxiv.org/abs/1911.06311).
 ```
 @misc{zhang2019sato,
     title={Sato: Contextual Semantic Type Detection in Tables},
-    author={Dan Zhang and Yoshihiko Suhara and Jinfeng Li and Madelon Hulsebos and {\c{C}}a{\u{g}}atay Demiralp and Wang-Chiew Tan},
+    author={Dan Zhang and 
+    Yoshihiko Suhara and 
+    Jinfeng Li and 
+    Madelon Hulsebos and 
+    {\c{C}}a{\u{g}}atay Demiralp and 
+    Wang-Chiew Tan},
     year={2019},
     eprint={1911.06311},
     archivePrefix={arXiv},
