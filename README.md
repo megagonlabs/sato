@@ -110,3 +110,26 @@ cd $BASEPATH/model
 python train_CRF_LC.py -c [config_file]
 ```
 Check out `train_CRF_LC.py` for supported configurations.
+
+## Citing Sato 
+
+Please cite [the arXiv preprint](https://arxiv.org/abs/1911.06311). 
+
+```
+@misc{zhang2019sato,
+    title={Sato: Contextual Semantic Type Detection in Tables},
+    author={Dan Zhang and Yoshihiko Suhara and Jinfeng Li and Madelon Hulsebos and {\c{C}}a{\u{g}}atay Demiralp and Wang-Chiew Tan},
+    year={2019},
+    eprint={1911.06311},
+    archivePrefix={arXiv},
+    primaryClass={cs.DB}
+}
+```
+
+## Contact 
+
+To get help with problems using Sato or replicating our results, please submit a GitHub issue.
+
+For personal communication related to Sato, please contact Dan Zhang (`dzhang@cs.umass.edu`) or 
+Çağatay Demiralp (`cagatay@megagon.ai`). 
+
