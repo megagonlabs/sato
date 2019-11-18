@@ -3,7 +3,7 @@ This repository includes source code, scripts, and data for training the **Sato*
 
 <img src="diagram-overview.svg" width="800"/>
 Above: Sato architecture. Sato's hyrid architecture consists of two basic modules; a topic-aware single-column prediction module and a structured output prediction module. The topic-aware module extends 
-<a href=https://arxiv.org/pdf/1905.10688.pdf>Sherlock</a>'s single-column prediction model, a deep neural network,  with additional topic subnetworks, incorporating <em>table intent</em> into the model. The structured output prediction module then combines the topic-aware results for all m columns, providing the final semantic type prediction for the columns in the table.
+<a href=https://arxiv.org/pdf/1905.10688.pdf>Sherlock</a>'s single-column prediction model (a deep neural network) with additional topic subnetworks, incorporating <em>table intent</em> into the model. The structured output prediction module then combines the topic-aware results for all m columns, providing the final semantic type prediction for the columns in the table.
 
 ## What is Sato useful for?
 Myriad data preparation and information retrieval tasks including data cleaning, integration, discovery and search rely
