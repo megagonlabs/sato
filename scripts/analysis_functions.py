@@ -3,9 +3,8 @@ import numpy as np
 from sklearn.metrics import classification_report
 import pandas as pd
 import os
-import matplotlib
-import matplotlib.pyplot as plt
-import seaborn as sns
+
+#import seaborn as sns
 
 
 
@@ -158,19 +157,24 @@ def large_table_gen(path, path_LDA):
     return table
 
 
+
 # generate all per-type plots: sherlock vs. +LDA/ +CRF/ +CRF&LDA
 def data_gen_all(path, path_LDA, comment, loc):
+    if not os.path.exists(loc):
+        os.makedirs(loc)
+
     y_sherlock, y_CRF, y_true = get_predictions(path)
     y_LDA, y_CRF_LDA, y_true = get_predictions(path_LDA)
     result_sherlock = report_gen(y_sherlock, y_true)
     result_LDA = report_gen(y_LDA, y_true)
     result_CRF = report_gen(y_CRF, y_true)
     result_CRF_LDA = report_gen(y_CRF_LDA, y_true)
+    #print( result_sherlock[1])
 
-    result_sherlock[1].to_csv('result_sherlock_{}.csv'.format(comment), loc)
-    result_LDA[1].to_csv('result_LDA_{}.csv'.format(comment), loc)
-    result_CRF[1].to_csv('result_CRF_{}.csv'.format(comment), loc)
-    result_CRF_LDA[1].to_csv('result_CRF_LDA_{}.csv'.format(comment), loc)
+    result_sherlock[1].to_csv(join(loc, 'result_sherlock_{}.csv'.format(comment)))
+    result_LDA[1].to_csv(join(loc, 'result_LDA_{}.csv'.format(comment)))
+    result_CRF[1].to_csv(join(loc, 'result_CRF_{}.csv'.format(comment)))
+    result_CRF_LDA[1].to_csv(join(loc, 'result_CRF_LDA_{}.csv'.format(comment)))
     
     #per_type_plot(result_LDA, result_sherlock , 'sherlock+LDA', 'Sherlock', comment=comment)    
     #per_type_plot(result_CRF, result_sherlock , 'sherlock+CRF', 'Sherlock', comment=comment)    

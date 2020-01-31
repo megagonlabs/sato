@@ -61,8 +61,14 @@ if __name__ == "__main__":
     p.add('--model_list',  nargs='+', type=str, help='For eval mode only, load pretrained models')
     p.add('--train_percent', type=str, default='train', help='Training with only part of the data, post-fix in the train-split file.')
 
-
+    p.add('--cross_validation', type=str_or_none, default=None, help='Format CVn-k, load the kth exp for n-fold cross validation')
+    # load train test from extract/out/train_test_split/CVn_{}.json, kth exp hold kth partition for evaluation
+    # save output and model file with postfix CVn-k
+    # if set to none, use standard parition from the train_test_split files.train_test_split
+    p.add('--multi_col_eval', type=str2bool, default=False, help='Evaluate using only multicol, train using all ')
+    # only implemented for cross validation, each patition has full/ multi-col version
     p.add('--comment', type=str, default='')
+
 
     args = p.parse_args()
     print("----------")
@@ -82,7 +88,7 @@ if __name__ == "__main__":
     dropout_ratio = args.dropout_rate    
     batch_size = args.batch_size
     patience = args.patience
-
+    cross_validation = args.cross_validation
 
     sherlock_feature_groups = args.sherlock_feature_groups
     topic_name = args.topic
@@ -105,13 +111,33 @@ if __name__ == "__main__":
     else:
         topic_dim = None
 
+
     # tensorboard logger
     currentDT = datetime.datetime.now()
     DTString = '-'.join([str(x) for x in currentDT.timetuple()[:5]])
     logging_base = 'sherlock_log' #if device == torch.device('cpu') else 'sherlock_cuda_log'
-    logging_path = join(os.environ['BASEPATH'],'results', logging_base, TYPENAME, '{}_{}_{}'.format(config_name, args.comment, DTString))
-   
- 
+    #logging_path = join(os.environ['BASEPATH'],'results', logging_base, TYPENAME, '{}_{}_{}'.format(config_name, args.comment, DTString))
+    
+    logging_name = '{}_{}'.format(config_name, args.comment)
+
+    if cross_validation:
+        cv_n, cv_k = cross_validation.split('-')
+        cv_n = int(cv_n[2:]) # trim CV prefix
+        cv_k = int(cv_k)
+        print('Conducting cross validation, current {}th experiment in {}-fold CV'.format(cv_k, cv_n))
+
+        logging_name = logging_name + '_' + cross_validation
+    if args.multi_col_only:
+        logging_name = logging_name + '_multi-col'
+
+    if args.multi_col_eval:
+        logging_name = logging_name + '_multi-col-eval'
+
+    logging_path = join(os.environ['BASEPATH'],'results', logging_base, TYPENAME, logging_name)
+
+    print('\nlogging_name', logging_name)
+
+    time_record = {}
 
     # 1. Dataset
     t1 = time()
@@ -126,8 +152,27 @@ if __name__ == "__main__":
     train_list, test_list = [], []
 
     for corpus in corpus_list:
-        with open(join(train_test_path, '{}_{}{}.json'.format(corpus, TYPENAME, multi_tag)), 'r') as f:
-            split = json.load(f)
+        if cross_validation is None:
+            with open(join(train_test_path, '{}_{}{}.json'.format(corpus, TYPENAME, multi_tag)), 'r') as f:
+                split = json.load(f)
+                train_ids = split[args.train_percent]
+                test_ids = split['test']
+        else:
+            with open(join(train_test_path, 'CV{}_{}_{}{}.json'.format(cv_n, corpus, TYPENAME, multi_tag)), 'r') as f:
+                split = json.load(f)
+
+                # use kth parition as testing
+                if args.multi_col_eval:
+                    test_ids = split['K{}_multi-col'.format(cv_k)]
+                else:
+                    test_ids = split['K{}'.format(cv_k)] 
+                train_ids = []
+                for i in range(cv_n):
+                    if i!= cv_k:
+                        train_ids.extend(split['K{}'.format(i)])
+        
+        print('data length:\n')        
+        print(len(train_ids), len(test_ids))
         
         whole_corpus = datasets.TableFeatures(corpus,
                                                 sherlock_feature_groups, 
@@ -137,10 +182,10 @@ if __name__ == "__main__":
                                                 max_col_count=None)
 
         if args.mode!='eval':
-            train = copy.copy(whole_corpus).set_filter(split[args.train_percent]).to_col()
+            train = copy.copy(whole_corpus).set_filter(train_ids).to_col()
             train_list.append(train)
 
-        test = copy.copy(whole_corpus).set_filter(split['test']).to_col()
+        test = copy.copy(whole_corpus).set_filter(test_ids).to_col()
         test_list.append(test)
 
     if args.mode!='eval':
@@ -149,9 +194,12 @@ if __name__ == "__main__":
 
     t2 = time()
     print("Done ({} sec.)".format(int(t2 - t1)))
-
+    time_record['Load'] = (t2 - t1)
 
     # 2. Models
+
+    start_time = time()
+
     classifier = build_sherlock(sherlock_feature_groups, num_classes=len(valid_types), topic_dim=topic_dim, dropout_ratio=dropout_ratio).to(device)
     loss_func = nn.CrossEntropyLoss().to(device)
 
@@ -278,15 +326,21 @@ if __name__ == "__main__":
         if not os.path.exists(pre_trained_loc):
                 os.makedirs(pre_trained_loc)
 
-        pretrained_name = '{}_{}.pt'.format(config_name, args.comment) if args.train_percent == 'train' else\
-                          '{}_{}_{}.pt'.format(config_name, args.comment, args.train_percent)
+        pretrained_name = '{}.pt'.format(logging_name) if args.train_percent == 'train' else\
+                          '{}_{}.pt'.format(logging_name, args.train_percent)
+
 
         torch.save(classifier.state_dict(),join(pre_trained_loc, pretrained_name))
 
         writer.close()
 
+        end_time = time()
+        print("Training (with validation) ({} sec.)".format(int(end_time - start_time)))
+        time_record['Train+validate'] = (end_time - start_time)
+
 
     elif args.mode == 'eval':
+        start_time = time()
         # load pre-trained model
         result_list = []
         model_loc = join(os.environ['BASEPATH'],'model','pre_trained_sherlock', TYPENAME)
@@ -335,6 +389,14 @@ if __name__ == "__main__":
         df = pd.DataFrame(result_list, columns=['model', 'macro avg', 'weighted avg'])
         print(df)
 
+        end_time = time()
+        print("Evaluation time {} sec.".format(int(end_time - start_time)))
+        time_record['Evaluation'] = (end_time - start_time)
         # save
+
+    # save time
+    with open(join(logging_path, "outputs", 'time.json'), 'w') as f:
+        json.dump(time_record, f)
+
 
 

@@ -1,4 +1,5 @@
 import os
+import sys
 from os.path import join
 import time
 import pandas as pd
@@ -69,6 +70,12 @@ p.add('--mode', type=str, help='experiment mode', choices=['train', 'eval'], def
 p.add('--model_list',  nargs='+', type=str, help='For eval mode only, load pretrained models')
 p.add('--train_percent', type=str, default='train', help='Training with only part of the data, post-fix in the train-split file.')
 
+p.add('--cross_validation', type=str_or_none, default=None, help='Format CVn-k, load the kth exp for n-fold cross validation')
+# load train test from extract/out/train_test_split/CVn_{}.json, kth exp hold kth partition for evaluation
+# save output and model file with postfix CVn-k
+# if set to none, use standard parition from the train_test_split files.train_test_split
+p.add('--multi_col_eval', type=str2bool, default=False, help='Evaluate using only multicol, train using all ')
+# only implemented for cross validation, each patition has full/ multi-col version
 
 p.add('--comment', type=str, default='')
 
@@ -104,6 +111,7 @@ shuffle_seed = 10
 
 config_name = os.path.split(args.config_file)[-1].split('.')[0]
 
+cross_validation = args.cross_validation
 
 #################### 
 # Preparations
@@ -156,11 +164,28 @@ currentDT = datetime.datetime.now()
 DTString = '-'.join([str(x) for x in currentDT.timetuple()[:5]])
 logging_base = 'CRF_log' #if device == torch.device('cpu') else 'CRF_cuda_log'
 #logging_path = join(os.environ['BASEPATH'],'results', logging_base, TYPENAME, '{}_{}_{}'.format(config_name, args.comment, DTString))
-logging_path = join(os.environ['BASEPATH'],'results', logging_base, TYPENAME, '{}_{}'.format(config_name, args.comment))
+
+logging_name = '{}_{}'.format(config_name, args.comment)
+
+if cross_validation:
+    cv_n, cv_k = cross_validation.split('-')
+    cv_n = int(cv_n[2:]) # trim CV prefix
+    cv_k = int(cv_k)
+    print('Conducting cross validation, current {}th experiment in {}-fold CV'.format(cv_k, cv_n))
+
+    logging_name = logging_name + '_' + cross_validation
+if args.multi_col_only:
+    logging_name = logging_name + '_multi-col'
+
+if args.multi_col_eval:
+    logging_name = logging_name + '_multi-col-eval'
+
+logging_path = join(os.environ['BASEPATH'],'results', logging_base, TYPENAME, logging_name)
+
 writer = SummaryWriter(logging_path)
 writer.add_text("configs", str(p.format_values()))
 
-
+time_record = {}
 
 ####################
 # Helpers
@@ -213,9 +238,28 @@ train_test_path = join(os.environ['BASEPATH'], 'extract', 'out', 'train_test_spl
 train_list, test_list = [], []
 
 for corpus in corpus_list:
+    if cross_validation is None:
+        with open(join(train_test_path, '{}_{}{}.json'.format(corpus, TYPENAME, multi_tag)), 'r') as f:
+            split = json.load(f)
+            train_ids = split[args.train_percent]
+            test_ids = split['test']
+    else:
+        with open(join(train_test_path, 'CV{}_{}_{}{}.json'.format(cv_n, corpus, TYPENAME, multi_tag)), 'r') as f:
+            split = json.load(f)
+            # use kth parition as testing
+            if args.multi_col_eval:
+                test_ids = split['K{}_multi-col'.format(cv_k)]
+            else:
+                test_ids = split['K{}'.format(cv_k)] 
 
-    with open(join(train_test_path, '{}_{}{}.json'.format(corpus, TYPENAME, multi_tag)), 'r') as f:
-        split = json.load(f)
+            train_ids = []
+            for i in range(cv_n):
+                if i!= cv_k:
+                    train_ids.extend(split['K{}'.format(i)])
+    
+    print('data length:\n')        
+    print(len(train_ids), len(test_ids))
+
 
     whole_corpus = datasets.TableFeatures(corpus,
                                             sherlock_feature_groups, 
@@ -225,10 +269,10 @@ for corpus in corpus_list:
                                             max_col_count=MAX_COL_COUNT)
 
     if args.mode!='eval':
-        train = copy.copy(whole_corpus).set_filter(split[args.train_percent])
+        train = copy.copy(whole_corpus).set_filter(train_ids)
         train_list.append(train)
 
-    test = copy.copy(whole_corpus).set_filter(split['test'])
+    test = copy.copy(whole_corpus).set_filter(test_ids)
     test_list.append(test)
 
 if args.mode!='eval':
@@ -238,8 +282,9 @@ testing_data = ConcatDataset(test_list)
 
 
 print('----------------------------------')
-print("Loading done:", time.time() - start_loading)
-
+end_loading = time.time()
+print("Loading done:", end_loading - start_loading)
+time_record['Load'] = end_loading - start_loading
 
 
 
@@ -249,6 +294,7 @@ model = CRF(len(valid_types) , batch_first=True).to(device)
 # Training 
 ####################
 if args.mode == 'train':
+
 
     classifier.load_state_dict(torch.load(join(pre_trained_sherlock_loc, pre_trained_sherlock_path), map_location=device))
 
@@ -314,7 +360,13 @@ if args.mode == 'train':
 
 
 
+    start_time = time.time()
+
     loss_counter = 0
+
+    # stop if loss increases with partience 1
+
+    prev_loss = sys.maxsize
     for epoch_idx in range(epochs):
         print("[Epoch {}/{}] ============================".format(epoch_idx,epochs))
         
@@ -367,7 +419,11 @@ if args.mode == 'train':
         epoch_loss = accumulate_loss/(it)
         writer.add_scalar("epoch_train_loss", epoch_loss, epoch_idx)
         
-        
+        if epoch_loss > prev_loss - 1e-4:
+            print('Early stopping!')
+            break
+        prev_loss = epoch_loss
+
         # Training accuracy
         # could be omitted 
         if training_acc:
@@ -443,6 +499,12 @@ if args.mode == 'train':
                       
 
     writer.close()
+
+    end_time = time.time()
+
+    print("Training (with validation) ({} sec.)".format(int(end_time - start_time)))
+    time_record['Train+validate'] = (end_time - start_time)
+
 
 # evaluation mode
 elif args.mode=='eval':
@@ -522,3 +584,5 @@ elif args.mode=='eval':
         df = pd.DataFrame(result_list, columns=['model', 'macro avg', 'weighted avg'])
         print(df)
 
+with open(join(logging_path, "outputs", 'time.json'), 'w') as f:
+    json.dump(time_record, f)
