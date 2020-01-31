@@ -7,7 +7,8 @@ python feature_importance.py  --model_type=CRF --model_path=CRF+LDA_pre.pt --top
 
 
 cd $BASEPATH/model
-python train_CRF_LC.py -c params/crf_configs/CRF.txt --comment=path
-python train_CRF_LC.py -c params/crf_configs/CRF+LDA.txt --comment=pathL
+python train_CRF_LC.py -c params/crf_configs/CRF.txt --multi_col_only=true --comment=path
+python train_CRF_LC.py -c params/crf_configs/CRF+LDA.txt --multi_col_only=true --comment=pathL
 
+cd $BASEPATH/scripts
 python per_type.py
