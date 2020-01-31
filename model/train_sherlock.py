@@ -108,7 +108,7 @@ if __name__ == "__main__":
     # tensorboard logger
     currentDT = datetime.datetime.now()
     DTString = '-'.join([str(x) for x in currentDT.timetuple()[:5]])
-    logging_base = 'sherlock_log' if device == torch.device('cpu') else 'sherlock_cuda_log'
+    logging_base = 'sherlock_log' #if device == torch.device('cpu') else 'sherlock_cuda_log'
     logging_path = join(os.environ['BASEPATH'],'results', logging_base, TYPENAME, '{}_{}_{}'.format(config_name, args.comment, DTString))
    
  
