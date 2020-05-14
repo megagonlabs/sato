@@ -6,13 +6,13 @@ Above: Sato architecture. Sato's hyrid architecture consists of two basic module
 <a href=https://arxiv.org/pdf/1905.10688.pdf>Sherlock</a>'s single-column prediction model (a deep neural network) with additional topic subnetworks, incorporating <em>table intent</em> into the model. The structured output prediction module then combines the topic-aware results for all m columns, providing the final semantic type prediction for the columns in the table.
 
 ## What is Sato useful for?
-Myriad data preparation and information retrieval tasks including data cleaning, integration, discovery and search rely
+Myriad data preparation and information retrieval tasks, including data cleaning, integration, discovery and search, rely
 on the ability to accurately detect data column types. Schema matching for data integration leverages data types to find correspondences between data columns across tables. Similarly, data discovery benefits from detecting types of data
-columns in order to return semantically relevant results foruser queries. Recognizing the semantics of table values helps aggregate information from multiple tabular data sources. Search engines also rely on the detection of semantically relevant column names to extend support to tables. Natural language based query interfaces for structured data can also benefit from semantic type detection. 
+columns in order to return semantically relevant results for user queries. Recognizing the semantics of table values helps aggregate information from multiple tabular data sources. Search engines also rely on the detection of semantically relevant column names to extend support to tables. Natural language based query interfaces for structured data can also benefit from semantic type detection. 
 
 
 ### Demo
-We set up a simple online [demo](http://18.191.96.23:5000/) where users can upload small tables and get semantic predictions for column types.
+We set up a simple online [demo](http://18.191.96.23:5000/) where you can upload small tables and get semantic predictions for column types.
 
 ![screenshot1](./demo/screenshots/1.png)
 ![screenshot2](./demo/screenshots/2.png)
