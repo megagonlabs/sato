@@ -59,7 +59,7 @@ tensorflow-estimator==1.13.0
 termcolor==1.1.0
 tornado==6.0.2
 traitlets==4.3.2
-urllib3==1.25.3
+urllib3==1.25.8
 wcwidth==0.1.7
 Werkzeug==0.15.4
 ConfigArgParse==0.14.0
