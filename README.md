@@ -1,5 +1,6 @@
 # Sato: Contextual Semantic Type Detection in Tables 
-This repository includes source code, scripts, and data for training the **Sato** model.  The repo also includes a pretrained  model to help replicate the results in [our preprint](https://arxiv.org/abs/1911.06311).  Sato is a hybrid machine learning model to automatically detect the semantic types of columns in tables, exploiting the signals from the context as well as the column values. Sato combines a deep learning model trained on a large-scale table corpus with topic modeling and structured prediction. 
+
+This repository includes source code, scripts, and data for training the **Sato** model.  The repo also includes a pretrained  model to help replicate the results in [our VLDB 2020 paper](http://www.vldb.org/pvldb/vol13/p1835-zhang.pdf).  Sato is a hybrid machine learning model to automatically detect the semantic types of columns in tables, exploiting the signals from the context as well as the column values. Sato combines a deep learning model trained on a large-scale table corpus with topic modeling and structured prediction. 
 
 <img src="diagram-overview.svg" width="800"/>
 Above: Sato architecture. Sato's hyrid architecture consists of two basic modules; a topic-aware single-column prediction module and a structured output prediction module. The topic-aware module extends 
@@ -112,12 +113,21 @@ python train_CRF_LC.py -c [config_file]
 ```
 Check out `train_CRF_LC.py` for supported configurations.
 
+
+
+## Original tables
+
+
+Please see [table_data](table_data) for the original tables used for the experiments.
+
+
+
 ## Citing Sato 
 
-Please cite [the arXiv preprint](https://arxiv.org/abs/1911.06311). 
+Please cite [our VLDB 2020 paper](http://www.vldb.org/pvldb/vol13/p1835-zhang.pdf)
 
 ```
-@misc{zhang2019sato,
+@article{zhang2020sato,
     title={Sato: Contextual Semantic Type Detection in Tables},
     author={Dan Zhang and 
             Yoshihiko Suhara and 
@@ -125,17 +135,18 @@ Please cite [the arXiv preprint](https://arxiv.org/abs/1911.06311).
             Madelon Hulsebos and 
             {\c{C}}a{\u{g}}atay Demiralp and 
             Wang-Chiew Tan},
-    year={2019},
-    eprint={1911.06311},
-    archivePrefix={arXiv},
-    primaryClass={cs.DB}
+    year = {2020},
+    volume = {13},
+    number = {12},
+    journal = {Proc. VLDB Endow.},
+    pages = {1835–1848},
+    numpages = {14},
+    url = {https://doi.org/10.14778/3407790.3407793}
 }
 ```
+
 
 ## Contact 
 
 To get help with problems using Sato or replicating our results, please submit a GitHub issue.
-
-For personal communication related to Sato, please contact Dan Zhang (`dzhang@cs.umass.edu`) or 
-Çağatay Demiralp (`cagatay@megagon.ai`). 
 
