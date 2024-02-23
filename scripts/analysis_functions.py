@@ -29,7 +29,7 @@ def report_gen(y_pred, y_true, report_name=None, out_loc=join(os.environ['BASEPA
     for t in report:
         if t not in ['accuracy','macro avg','weighted avg']:
             report[t]['type']=t
-            df_report= df_report.append(report[t], ignore_index=True)
+            df_report= df_report.concat(report[t], ignore_index=True)
         else:
             overall[t] = report[t]
 
